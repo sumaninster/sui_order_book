@@ -60,7 +60,7 @@ module sui_order_book::orderbook {
         table::add(&mut self.order_books, pair_id, init_order_book());
         pair_id
     }
-    // Partition the array and return the index of the pivot
+    // Partition the vector and return the index of the pivot
     fun partition(list: &mut vector<Order>, low: u64, high: u64, ascending: bool): u64 {
         let pivot_price = vector::borrow(list, high).price;
         let i = low;
@@ -108,9 +108,8 @@ module sui_order_book::orderbook {
         std::debug::print(&std::ascii::string(b"-----END-----:"));
     }
     // Define a function to submit a bid order to the order book
-    // This function takes in the token pair, price, and amount of the bid order,
+    // This function takes in the price and amount of the bid order,
     // as well as the address of the maker (i.e., the user who submitted the order)
-    // It generates a unique ID for the order and adds it to the bid side of the order book
     public fun submit_bid_order(self: &mut OrderBooks, pair_id: u64, price: u128, amount: u64, maker: address) {
         // Get the order book for the token pair
         let order_book = table::borrow_mut(&mut self.order_books, pair_id);
@@ -125,9 +124,8 @@ module sui_order_book::orderbook {
         vector::push_back(&mut order_book.bids, bid_order);
     }
     // Define a function to submit an ask order to the order book
-    // This function takes in the token pair, price, and amount of the ask order,
+    // This function takes in the price and amount of the ask order,
     // as well as the address of the maker (i.e., the user who submitted the order)
-    // It generates a unique ID for the order and adds it to the ask side of the order book
     public fun submit_ask_order(self: &mut OrderBooks, pair_id: u64, price: u128, amount: u64, maker: address) {
         // Get the order book for the token pair
         let order_book = table::borrow_mut(&mut self.order_books, pair_id);
@@ -142,7 +140,7 @@ module sui_order_book::orderbook {
         vector::push_back(&mut order_book.asks, ask_order);
     }
     // Define a function to match bid orders with ask orders in the order book
-    // This function takes in the token pair and the amount of the bid order that needs to be filled
+    // This function takes in the OrderBooks reference and token pair id for which the ask and bid orders needs to be processed
     // It matches the bid order with the best available ask orders in the order book
     // It fills the bid order and ask orders that are fully filled, and partially fills the rest
     public fun match_orders(self: &mut OrderBooks, pair_id: u64) {
